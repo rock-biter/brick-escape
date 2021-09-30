@@ -10,8 +10,8 @@ module.exports = merge(common, {
         chunkFilename: 'js/[name].chunk.js',
     },
     devServer: {
-        inline: true,
-        hot: true,
+        // inline: true,
+        liveReload: true,
     },
     plugins: [
         new Webpack.DefinePlugin({
@@ -41,7 +41,7 @@ module.exports = merge(common, {
             },
             {
                 test: /\.s?css$/i,
-                use: ['style-loader', 'css-loader?sourceMap=true', 'postcss-loader', 'sass-loader'],
+                use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader'],
             },
         ]
     }
