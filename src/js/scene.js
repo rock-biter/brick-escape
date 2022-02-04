@@ -44,12 +44,12 @@ export default class BasicScene {
         this.score = document.getElementById('score')
         
 
-        this.initRenderer()
+        this.initRenderer(enableShadow)
         this.initDefaultLight()
         this.initCamera(camera)
         // this.initWorld(world.forces)
         this.animate()
-        this.initControls() 
+        // this.initControls() 
 
     }
 
@@ -58,7 +58,11 @@ export default class BasicScene {
         this.renderer.setSize(window.innerWidth, window.innerHeight)
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.renderer.shadowMap.enabled = enableShadow
+        // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.body.appendChild(this.renderer.domElement);
+
+        this.renderer.toneMapping = THREE.ReinhardToneMapping
+        this.renderer.toneMappingExposure = 2
 
         window.addEventListener('resize', () => {
             this.onWindowResize()
@@ -123,7 +127,7 @@ export default class BasicScene {
     }
 
     initDefaultLight() {
-        const ambientLight = new THREE.AmbientLight('#ffffff',0.05)
+        const ambientLight = new THREE.AmbientLight('#ffffff',0.0)
         // const dirLight = new THREE.DirectionalLight('#ffffff',0.8)
         // dirLight.position.copy(new THREE.Vector3(10,15,0))
         // dirLight.target = new THREE.Vector3(0,0,0)
@@ -131,7 +135,7 @@ export default class BasicScene {
         this.lights.push(ambientLight)
         // this.lights.push(dirLight)
 
-        // this.scene.add(ambientLight)
+        this.scene.add(ambientLight)
         // this.scene.add(dirLight)
     }
 
