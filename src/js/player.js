@@ -4,6 +4,7 @@ import gsap from 'gsap'
 export default class Player {
 
   isMoving = false
+  stop = false
 
   constructor({ scene, cell }) {
     this.scene = scene
@@ -81,7 +82,7 @@ export default class Player {
     gsap.to(this.mesh.position,{duration: 1, x: x, z: z, ease: 'linear', onComplete: () => {
       
 
-      if(cell.connections.length == 2) {
+      if(cell.connections.length == 2 && !this.stop) {
         const nextCell = cell.connections.find(el => el.index !== this.currentCell.index)
 
         this.currentCell = cell
@@ -89,6 +90,7 @@ export default class Player {
       } else {
         this.currentCell = cell
         this.isMoving = false
+        this.stop = false
       }
 
     } })
@@ -103,7 +105,10 @@ export default class Player {
       console.log(e)
       const key = e.code
 
-      if(this.isMoving) return
+      if(this.isMoving) {
+        this.stop = true
+        return
+      }
       
       switch(key) {
         case 'ArrowUp':
