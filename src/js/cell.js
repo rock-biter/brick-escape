@@ -5,6 +5,8 @@ export default class Cell {
 
   walls = [] //top, right, bottom, left
   visited = false
+  isStart = false
+  isExit = false
 
   neighbors = []
   connections = []
@@ -112,26 +114,37 @@ export default class Cell {
     neighbor.connections.push(this)
 
     const diff = this.index - neighbor.index
+    const wallIndexes = []
 
     switch(diff) {
       case this.resolution:
-        this.scene.scene.remove(this.walls[0].active = false)
-        this.scene.scene.remove(neighbor.walls[2].active = false)
+        wallIndexes.push(0)
+        wallIndexes.push(2)
         break
       case -this.resolution:
-        this.scene.scene.remove(this.walls[2].active = false)
-        this.scene.scene.remove(neighbor.walls[0].active = false)
+        wallIndexes.push(2)
+        wallIndexes.push(0)
         break
       case 1:
-        this.scene.scene.remove(this.walls[3].active = false)
-        this.scene.scene.remove(neighbor.walls[1].active = false)
+        wallIndexes.push(3)
+        wallIndexes.push(1)
         break
       case -1:
-        this.scene.scene.remove(this.walls[1].active = false)
-        this.scene.scene.remove(neighbor.walls[3].active = false)
+        wallIndexes.push(1)
+        wallIndexes.push(3)
         break
     }
 
+    this.removeWall(wallIndexes[0])
+    neighbor.removeWall(wallIndexes[1])
+
+
+  }
+
+  removeWall(i) {
+
+    this.walls[i].active = false
+    this.walls[i].removeMesh()
 
   }
 

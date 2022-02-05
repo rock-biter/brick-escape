@@ -1,5 +1,6 @@
 import '../scss/app.scss';
 import * as THREE from 'three'
+import gsap from 'gsap'
 
 import Maze from './maze';
 import BasicScene from './scene'
@@ -15,7 +16,9 @@ if (process.env.NODE_ENV === 'development') {
 
 window.addEventListener('DOMContentLoaded', () => {
 
-	const resolution = 50
+
+
+	const resolution = 20
 	const cellSize = 4
 
 
@@ -26,7 +29,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	const maze = new Maze({resolution, cellSize, scene })
 
-	const startCell = maze.cells[ Math.floor( Math.random() * resolution**2 ) ]
+	// const startCell = maze.cells[ Math.floor( Math.random() * resolution**2 ) ]
+	const startCell = maze.startCell
 	const startPosition = {
 		x: startCell.i*cellSize,
 		z: startCell.j*cellSize
@@ -35,25 +39,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	console.log(startPosition)
 
 	scene.camera.position.set(startPosition.x,30,startPosition.z)
-	
-
-	// const playerLight = new THREE.PointLight( '#dba98c', 25 ,12, 3  )
-	// // const playerLight = new THREE.PointLight( '#FFDFCD', 4 ,100, 2  )
-	// playerLight.position.set(startPosition.x,cellSize+1,startPosition.z)
-	// playerLight.castShadow = true
-	// playerLight.shadow.radius = 50
-	// playerLight.shadow.bias = 0.0001
-	// playerLight.shadow.normalBias = 0.1
-	// playerLight.shadow.mapSize.width = 1024*4; // default
-	// playerLight.shadow.mapSize.height = 1024*4; // default
-	// // playerLight.shadow.camera.near = 0.5; // default
-	// // playerLight.shadow.camera.far = 500; // default
-	// // playerLight.shadow.camera.fov = 145
-	// // playerLight.shadow.camera.updateProjectionMatrix()
-	// // playerLight.power = 20
-	// scene.scene.add(playerLight)
-
-
 
 	const player = new Player({ scene, cell: startCell })
 	// player.init(startCell)
@@ -81,4 +66,13 @@ window.addEventListener('DOMContentLoaded', () => {
 	// scene.controls.target = new THREE.Vector3(startPosition.x,0,startPosition.z)
 
 
+
+
+})
+
+window.addEventListener('win',() => {
+	console.log('win event')
+	const winMessage = document.getElementById('win')
+
+	gsap.fromTo(winMessage,{y: 100, autoAlpha: 0},{duration: 3, y: 0, autoAlpha: 1 })
 })

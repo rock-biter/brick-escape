@@ -8,6 +8,8 @@ export default class Maze {
   cells = []
   walls = []
   pillars = []
+  startCell
+  exitCell
 
   stack = []
   currentCell = null
@@ -103,6 +105,9 @@ export default class Maze {
 
     }
 
+    this.createEntrance()
+    this.createExit()
+
 
 
     // this.checkPoints = []
@@ -150,6 +155,50 @@ export default class Maze {
     return neighbors.filter(item => {
      return this.cells[item].visited === false 
     });
+
+  }
+
+  addLoop() {
+    //aggiungere connessioni tra celle per creare dei loop nel labirinto
+    
+  }
+
+  solver() {
+    // 
+  }
+
+  createEntrance() {
+
+    const coords = {
+      i: Math.floor( this.resolution / 2),
+      j: this.resolution - 1
+    }
+
+    const cell = this.cells.find(cell => cell.i === coords.i && cell.j === coords.j)
+
+    console.log('start at',cell)
+
+    cell.removeWall(2)
+    cell.isStart = true
+    this.startCell = cell
+
+
+  }
+
+  createExit() {
+
+    const coords = {
+      i: Math.floor( this.resolution / 2),
+      j: 0
+    }
+
+    const cell = this.cells.find(cell => cell.i === coords.i && cell.j === coords.j)
+
+    console.log('start at',cell)
+
+    cell.removeWall(0)
+    cell.isExit = true
+    this.exitCell = cell
 
   }
 
