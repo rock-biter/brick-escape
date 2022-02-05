@@ -19,10 +19,6 @@ body {
     overflow: hidden;
 }
 
-h1 {
-    color: $base-color;
-}
-
 #win {
     position: fixed;
     bottom: 20vh;
@@ -33,6 +29,7 @@ h1 {
     font-size: calc(3vw + 15px);
     text-transform: uppercase;
     font-weight: 700;
+    pointer-events: none;
 }
 
 #credits {
@@ -42,4 +39,5 @@ h1 {
     color: #aaa;
     font-size: 14px;
     left: 20px;
+    pointer-events: none;
 }
