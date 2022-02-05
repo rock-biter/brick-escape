@@ -4,11 +4,20 @@
 
 @import './partials/variables';
 
+:root {
+    --app-height: 100%;
+ }
+
 // * {
 //     margin: 0;
 //     padding: 0;
 //     box-sizing: border-box;
 // }
+
+body {
+    height: var(--app-height);
+    overflow: hidden;
+}
 
 h1 {
     color: $base-color;

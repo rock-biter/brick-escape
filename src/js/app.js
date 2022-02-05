@@ -12,6 +12,10 @@ if (process.env.NODE_ENV === 'development') {
 
 // console.log('hello world');
 
+const appH = () => {
+	const doc = document.documentElement
+	doc.style.setProperty('--app-height',`${window.innerHeight}px`)
+}
 
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -66,7 +70,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	// scene.controls.target = new THREE.Vector3(startPosition.x,0,startPosition.z)
 
 
-
+appH()
 
 })
 
