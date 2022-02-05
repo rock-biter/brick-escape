@@ -92,9 +92,9 @@ export default class Player {
 
     this.isMoving = true
 
-    gsap.to(this.scene.camera.position,{duration: 0.2, x: x, z: z, ease: 'linear' })
+    gsap.to(this.scene.camera.position,{duration: 0.5, x: x, z: z, ease: 'linear' })
 
-    gsap.to(this.mesh.position,{duration: 0.2, x: x, z: z, ease: 'linear', onComplete: () => {
+    gsap.to(this.mesh.position,{duration: 0.5, x: x, z: z, ease: 'linear', onComplete: () => {
 
       
       if(cell.isExit) {
@@ -155,6 +155,54 @@ export default class Player {
     })
 
   }
+
+  initMobileControls() {
+    window.addEventListener('touchstart', this.handleTouchStart, false);        
+    window.addEventListener('touchmove', this.handleTouchMove, false);
+  }
+
+  getTouches(evt) {
+    return evt.touches
+  } 
+
+  handleTouchStart(evt) {
+    const firstTouch = this.getTouches(evt)[0];                                      
+    this.xDown = firstTouch.clientX;                                      
+    this.yDown = firstTouch.clientY;                                      
+  };                                                
+                                                                         
+  handleTouchMove(evt) {
+    if ( ! this.xDown || ! this.yDown ) {
+        return;
+    }
+
+    var xUp = evt.touches[0].clientX;                                    
+    var yUp = evt.touches[0].clientY;
+
+    var xDiff = this.xDown - xUp;
+    var yDiff = this.yDown - yUp;
+                                                                         
+    if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
+        if ( xDiff > 0 ) {
+            /* right swipe */ 
+            this.moveRight()
+        } else {
+            /* left swipe */
+            this.moveLeft()
+        }                       
+    } else {
+        if ( yDiff > 0 ) {
+            /* down swipe */ 
+            this.moveDown()
+        } else { 
+            /* up swipe */
+            this.moveUp()
+        }                                                                 
+    }
+    /* reset values */
+    this.xDown = null;
+    this.yDown = null;                                             
+  };
 
   moveUp() {
 
