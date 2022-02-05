@@ -17,6 +17,8 @@
 body {
     height: var(--app-height);
     overflow: hidden;
+    color: white;
+    user-select: none;
 }
 
 #win {
@@ -40,4 +42,48 @@ body {
     font-size: 14px;
     left: 20px;
     pointer-events: none;
+}
+
+.indicators {
+    width: 100%;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: calc(0.7vw + 10px);
+    gap: 15px;
+}
+
+.indicators > * {
+    flex-basis: 0;
+    flex-grow: 1;
+}
+
+.progress-wrapper {
+    flex-grow: 1;
+    max-width: 300px;
+    position: relative;
+}
+
+#progress {
+    height: 14px;
+    width: 0;
+    background-color: #DBAAD4;
+}
+
+#progress-percentage {
+    position: absolute;
+    line-height: 14px;
+    font-size: 12px;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+}
+
+#time {
+    text-align: right;
 }

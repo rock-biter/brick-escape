@@ -51,6 +51,7 @@ export default class Maze {
     this.generate()
 
     for (const cell of this.cells) {
+      cell.visited = false
       cell.buildWalls()
     }
   }

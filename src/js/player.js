@@ -9,11 +9,22 @@ export default class Player {
   stop = false
   win = false
 
-  constructor({ scene, cell }) {
+  time = 0
+  steps = 0
+  progress = 0
+
+  intervalTimer
+
+  constructor({ scene, cell, maze }) {
     this.scene = scene
     this.cellSize = cell.size
+    this.maze = maze
 
-    console.log(cell)
+    this.progressBar = document.getElementById('progress')
+    this.stepsIndicator = document.getElementById('steps')
+    this.progressPercentage = document.getElementById('progress-percentage')
+    this.timeIndicator = document.getElementById('time')
+    // console.log(cell)
     this.currentCell = cell
 
     this.init(cell)
@@ -63,6 +74,7 @@ export default class Player {
 
   startPosition(cell) {
     this.resetPosition(cell)
+    this.setAsVisited(cell)
 
     gsap.to(this.light,{duration: 4, intensity: 25 })
     gsap.to(this.scene.camera.position,{duration: 2, z: cell.j*this.cellSize})
@@ -71,26 +83,56 @@ export default class Player {
     } })
   }
 
+  setAsVisited(cell) {
+
+    this.steps++
+    if(!cell.visited) {
+      cell.visited = true
+      this.progress++
+
+      const percentage = this.progress * 100 / this.maze.cells.length
+      gsap.to(this.progressBar,{duration: 0.1, width: percentage }) 
+      this.progressPercentage.innerHTML = `${ percentage.toFixed(0) } %`
+    }
+
+    this.stepsIndicator.innerHTML = `${this.steps} m`
+
+  }
+
   resetPosition(cell) {
     const x = cell.i*this.cellSize
     const z = cell.j*this.cellSize
 
     const position = new THREE.Vector3(x,0,z + this.cellSize*1.5)
     this.mesh.position.copy(position)
-    this.scene.camera.position.set(x,35,z + this.cellSize*1.5)
+    this.scene.camera.position.set(x,this.scene.camera.position.y,z + this.cellSize*1.5)
     this.scene.camera.rotation.set(-Math.PI/2,0,0)
     // this.scene.controls.target.set(x,0,z)
 	  
   }
 
+  timer = () => {
+    this.time++
+
+    const seconds = this.time % 60
+    const minutes = this.time / 60
+    this.timeIndicator.innerHTML = `${ minutes.toFixed(0) }:${ seconds < 10 ? '0'+seconds : seconds }`
+  }
 
   moveTo(cell) {
 
+    if(this.currentCell.isStart) {
+
+      this.intervalTimer = setInterval( this.timer, 1000)
+
+    }
     
     const x = cell.i*this.cellSize
     const z = cell.j*this.cellSize
 
     this.isMoving = true
+
+    this.setAsVisited(cell)
 
     gsap.to(this.scene.camera.position,{duration: 0.5, x: x, z: z, ease: 'linear' })
 
@@ -99,6 +141,7 @@ export default class Player {
       
       if(cell.isExit) {
         window.dispatchEvent(playerWin)
+        clearInterval( this.intervalTimer )
 
         gsap.to(cell.walls[1].material.color,{duration: 3, r: 0.29, g: 0.78, b: 0.02})
         gsap.to(this.mesh.position,{duration: 3, z: -cell.size*1.5, onComplete: () => {

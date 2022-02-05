@@ -42,10 +42,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	console.log(startPosition)
 
-	const cameraH = window.innerWidth < 780 ? 20 : 30
+	const cameraH = window.innerWidth < 780 ? 19 : 22
 	scene.camera.position.set(startPosition.x,cameraH,startPosition.z)
 
-	const player = new Player({ scene, cell: startCell })
+	const player = new Player({ scene, cell: startCell, maze })
 	// player.init(startCell)
 
 	// const helper = new THREE.CameraHelper( playerLight.shadow.camera );
