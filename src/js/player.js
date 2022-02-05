@@ -91,7 +91,12 @@ export default class Player {
       this.progress++
 
       const percentage = this.progress * 100 / this.maze.cells.length
-      gsap.to(this.progressBar,{duration: 0.1, width: percentage }) 
+      if(percentage > 40) {
+        gsap.to(this.progressBar,{duration: 1, backgroundColor: '#ff982b' })
+      } else if (percentage > 70 ) {
+        gsap.to(this.progressBar,{ duration: 1, backgroundColor: '#A8CB1E'})
+      }
+      gsap.to(this.progressBar,{duration: 0.1, width: `${percentage}%` }) 
       this.progressPercentage.innerHTML = `${ percentage.toFixed(0) } %`
     }
 
