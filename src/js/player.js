@@ -13,7 +13,7 @@ export default class Player {
   steps = 0
   progress = 0
 
-  intervalTimer
+  intervalTimer = null
 
   constructor({ scene, cell, maze }) {
     this.scene = scene
@@ -126,7 +126,7 @@ export default class Player {
 
   moveTo(cell) {
 
-    if(this.currentCell.isStart) {
+    if(this.currentCell.isStart && !this.intervalTimer) {
 
       this.intervalTimer = setInterval( this.timer, 1000)
 
@@ -149,7 +149,7 @@ export default class Player {
         clearInterval( this.intervalTimer )
 
         gsap.to(cell.walls[1].material.color,{duration: 3, r: 0.29, g: 0.78, b: 0.02})
-        gsap.to(this.mesh.position,{duration: 3, z: -cell.size*1.5, onComplete: () => {
+        gsap.to(this.mesh.position,{duration: 3, z: -cell.size*1.3, onComplete: () => {
             this.currentCell = cell
             this.isMoving = false
             this.stop = false            
