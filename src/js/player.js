@@ -126,6 +126,8 @@ export default class Player {
 
   initControls() {
 
+    this.initMobileControls()
+
     window.addEventListener('keyup',(e) => {
       console.log(e)
       const key = e.code
