@@ -197,18 +197,20 @@ export default class Player {
     if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
         if ( xDiff > 0 ) {
             /* right swipe */ 
-            this.moveLeft()
+            this.moveRight()
         } else {
             /* left swipe */
-            this.moveRight()
+            
+            this.moveLeft()
         }                       
     } else {
         if ( yDiff > 0 ) {
             /* down swipe */ 
-            this.moveUp()
+            this.moveDown()
         } else { 
             /* up swipe */
-            this.moveDown()
+            this.moveUp()
+            
         }                                                                 
     }
     /* reset values */
