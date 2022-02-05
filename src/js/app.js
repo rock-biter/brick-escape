@@ -42,7 +42,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	console.log(startPosition)
 
-	scene.camera.position.set(startPosition.x,30,startPosition.z)
+	const cameraH = window.innerWidth < 780 ? 20 : 30
+	scene.camera.position.set(startPosition.x,cameraH,startPosition.z)
 
 	const player = new Player({ scene, cell: startCell })
 	// player.init(startCell)
