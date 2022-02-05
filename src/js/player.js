@@ -167,15 +167,25 @@ export default class Player {
     return evt.touches
   } 
 
-  handleTouchStart(evt) {
+  handleTouchStart = (evt) => {
     const firstTouch = this.getTouches(evt)[0];                                      
     this.xDown = firstTouch.clientX;                                      
     this.yDown = firstTouch.clientY;                                      
   };                                                
                                                                          
-  handleTouchMove(evt) {
+  handleTouchMove = (evt) => {
     if ( ! this.xDown || ! this.yDown ) {
         return;
+    }
+
+    // if(this.win) return
+
+    if(this.isMoving || this.win) {
+
+      this.xDown = null;
+      this.yDown = null; 
+      this.stop = true
+      return
     }
 
     var xUp = evt.touches[0].clientX;                                    
@@ -187,18 +197,18 @@ export default class Player {
     if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
         if ( xDiff > 0 ) {
             /* right swipe */ 
-            this.moveRight()
+            this.moveLeft()
         } else {
             /* left swipe */
-            this.moveLeft()
+            this.moveRight()
         }                       
     } else {
         if ( yDiff > 0 ) {
             /* down swipe */ 
-            this.moveDown()
+            this.moveUp()
         } else { 
             /* up swipe */
-            this.moveUp()
+            this.moveDown()
         }                                                                 
     }
     /* reset values */
