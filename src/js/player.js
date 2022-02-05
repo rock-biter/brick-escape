@@ -159,8 +159,8 @@ export default class Player {
   }
 
   initMobileControls() {
-    window.addEventListener('touchstart', this.handleTouchStart, false);        
-    window.addEventListener('touchmove', this.handleTouchMove, false);
+    document.addEventListener('touchstart', this.handleTouchStart, false);        
+    document.addEventListener('touchmove', this.handleTouchMove, false);
   }
 
   getTouches(evt) {
