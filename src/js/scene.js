@@ -5,244 +5,226 @@ import gsap from 'gsap'
 
 // import * as SOUNDS from './audio'
 
-const event = new Event('gameover');
+const event = new Event('gameover')
 
 export default class BasicScene {
+	isStarted = false
 
-    isStarted = false
+	score
+	bestScore
 
-    score
-    bestScore
+	scene
+	world
 
-    scene
-    world
+	// wind = new CANNON.Vec3(0,0,-0.0002)
 
-    // wind = new CANNON.Vec3(0,0,-0.0002)
+	camera
+	controls
+	renderer
 
-    camera
-    controls
-    renderer
+	offset = 0
 
-    offset = 0
+	jump = false
 
-    jump = false
+	lights = []
+	meshes = []
+	bodies = []
 
-    lights = []
-    meshes = []
-    bodies = []
+	clock
+	fr = 1 / 60
 
-    clock
-    fr = 1/60
+	constructor({ camera = {}, enableShadow = false, world = { forces: [] } }) {
+		this.clock = new THREE.Clock()
 
-    constructor({ camera = {}, enableShadow = false, world = { forces: []}}) {
+		this.scene = new THREE.Scene()
+		this.scene.background = new THREE.Color('#000000')
+		// this.scene.add(new THREE.AxesHelper(5))
+		this.score = document.getElementById('score')
 
-        this.clock = new THREE.Clock()
+		this.initRenderer(enableShadow)
+		this.initDefaultLight()
+		this.initCamera(camera)
+		// this.initWorld(world.forces)
+		this.animate()
+		this.initControls()
+	}
 
-        this.scene = new THREE.Scene()
-        this.scene.background = new THREE.Color('#000000')
-        // this.scene.add(new THREE.AxesHelper(5))
-        this.score = document.getElementById('score')
-        
+	initRenderer(enableShadow) {
+		this.renderer = new THREE.WebGLRenderer()
+		this.renderer.setSize(window.innerWidth, window.innerHeight)
+		this.renderer.setPixelRatio(window.devicePixelRatio)
+		this.renderer.shadowMap.enabled = enableShadow
+		// this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+		document.body.appendChild(this.renderer.domElement)
 
-        this.initRenderer(enableShadow)
-        this.initDefaultLight()
-        this.initCamera(camera)
-        // this.initWorld(world.forces)
-        this.animate()
-        // this.initControls() 
+		this.renderer.toneMapping = THREE.ReinhardToneMapping
+		this.renderer.toneMappingExposure = 2
 
-    }
+		window.addEventListener('resize', () => {
+			this.onWindowResize()
+		})
+	}
 
-    initRenderer(enableShadow) {
-        this.renderer = new THREE.WebGLRenderer()
-        this.renderer.setSize(window.innerWidth, window.innerHeight)
-        this.renderer.setPixelRatio(window.devicePixelRatio)
-        this.renderer.shadowMap.enabled = enableShadow
-        // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.body.appendChild(this.renderer.domElement);
+	initControls() {
+		this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+		this.controls.enableRotate = true
+		// this.controls.enableZoom = false
+		this.controls.enablePan = true
+		this.controls.enableDamping = true
+		this.controls.target = new THREE.Vector3(0, 0, 0)
+	}
 
-        this.renderer.toneMapping = THREE.ReinhardToneMapping
-        this.renderer.toneMappingExposure = 2
+	initCamera({ type = 'perspective', near = 0, far = 2000, fov = 45 } = {}) {
+		if (type === 'orto') {
+			this.camera = new THREE.OrthographicCamera(
+				window.innerWidth / -48,
+				window.innerWidth / 48,
+				window.innerHeight / 48,
+				window.innerHeight / -48,
+				near,
+				far
+			)
+		} else {
+			this.camera = new THREE.PerspectiveCamera(
+				40,
+				window.innerWidth / window.innerHeight,
+				1,
+				1000
+			)
+		}
 
-        window.addEventListener('resize', () => {
-            this.onWindowResize()
-        })
-    }
+		this.scene.add(this.camera)
 
-    initControls() {
+		this.camera.position.set(50, 50, 50)
 
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-        this.controls.enableRotate = false
-        this.controls.enableZoom = false
-        this.controls.enablePan = true
-        this.controls.enableDamping = true
-        this.controls.target = new THREE.Vector3(0,0,0)
-    }
+		if (window.innerWidth < 890) {
+			this.camera.zoom = 0.7
+			this.camera.updateProjectionMatrix()
+			this.offset = 7
+		}
+	}
 
-    initCamera({type = 'perspective', near = 0, far = 2000, fov = 45}={}) {
+	addObject({ mesh, body }) {
+		this.addBody(body)
+		this.addMesh(mesh)
+	}
 
-        if(type === 'orto') {
+	addMesh(mesh) {
+		this.meshes.push(mesh)
+		this.scene.add(mesh)
+	}
 
-            this.camera = new THREE.OrthographicCamera( 
-                window.innerWidth / - 48, 
-                window.innerWidth / 48, 
-                window.innerHeight / 48, 
-                window.innerHeight / - 48, 
-                near, 
-                far );
+	addBody(body) {
+		this.bodies.push(body)
+		this.world.addBody(body)
+	}
 
-        } else {
+	initDefaultLight() {
+		const ambientLight = new THREE.AmbientLight('#ffffff', 0.0)
+		// const dirLight = new THREE.DirectionalLight('#ffffff',0.8)
+		// dirLight.position.copy(new THREE.Vector3(10,15,0))
+		// dirLight.target = new THREE.Vector3(0,0,0)
 
-            this.camera = new THREE.PerspectiveCamera(
-                40, window.innerWidth / window.innerHeight, 1, 1000
-              )
+		this.lights.push(ambientLight)
+		// this.lights.push(dirLight)
 
-        }
+		this.scene.add(ambientLight)
+		// this.scene.add(dirLight)
+	}
 
-        this.scene.add(this.camera);
-        
-        this.camera.position.set(50, 50, 50)
+	initWorld(forces) {
+		let force = new CANNON.Vec3()
+		for (let f of forces) {
+			force = force.vadd(f)
+		}
 
-        if(window.innerWidth < 890) {
-            this.camera.zoom = 0.70
-            this.camera.updateProjectionMatrix()
-            this.offset = 7
-        }
+		console.log(force)
+		// todo: sum all the forces and apply to world
+		this.world = new CANNON.World({
+			gravity: force,
+			allowSleep: true,
+		})
+	}
 
-    }
+	onWindowResize() {
+		console.log('resize')
+		if (this.camera instanceof THREE.PerspectiveCamera) {
+			this.camera.aspect = window.innerWidth / window.innerHeight
+		} else if (this.camera instanceof THREE.OrthographicCamera) {
+			this.camera.left = window.innerWidth / -48
+			this.camera.right = window.innerWidth / 48
+			this.camera.top = window.innerHeight / 48
+			this.camera.bottom = window.innerHeight / -48
+		}
+		this.camera.updateProjectionMatrix()
+		this.renderer.setSize(window.innerWidth, window.innerHeight)
+		this.render()
+	}
 
-    addObject({mesh,body}) {
-        this.addBody(body)
-        this.addMesh(mesh)
-    }
+	reset() {
+		// SOUNDS._GAME_OVER.play()
 
-    addMesh(mesh) {
-        this.meshes.push(mesh)
-        this.scene.add(mesh)
-    }
+		// let player = this.bodies[0]
+		// player.position.copy( new CANNON.Vec3(0,10,0))
+		// player.velocity = new CANNON.Vec3(0,0,0)
 
-    addBody(body) {
-        this.bodies.push(body)
-        this.world.addBody(body)
-    }
+		// this.world.gravity = new CANNON.Vec3(0,-100,0)
+		// this.isStarted = false
+		// this.jump = false
 
-    initDefaultLight() {
-        const ambientLight = new THREE.AmbientLight('#ffffff',0.0)
-        // const dirLight = new THREE.DirectionalLight('#ffffff',0.8)
-        // dirLight.position.copy(new THREE.Vector3(10,15,0))
-        // dirLight.target = new THREE.Vector3(0,0,0)
+		window.dispatchEvent(event)
+	}
 
-        this.lights.push(ambientLight)
-        // this.lights.push(dirLight)
+	animate() {
+		requestAnimationFrame(() => {
+			this.animate()
+		})
 
-        this.scene.add(ambientLight)
-        // this.scene.add(dirLight)
-    }
+		this.controls && this.controls.update()
+		// let body = this.bodies[0]
 
-    initWorld(forces) {
+		// if(body) {
 
-        let force = new CANNON.Vec3();
-        for(let f of forces) {
-            force = force.vadd(f);
-        }
+		//     if(this.isStarted)
+		//         body.applyImpulse(this.wind);
 
-        console.log(force);
-        // todo: sum all the forces and apply to world
-        this.world = new CANNON.World({
-            gravity: force,
-            allowSleep: true
-        })
+		//     if(body.position.y < -20)
+		//         this.reset()
 
-        
-    }
+		// }
 
-    onWindowResize() {
-        console.log('resize')
-        if(this.camera instanceof THREE.PerspectiveCamera) {
-            this.camera.aspect = window.innerWidth / window.innerHeight
-        } else if(this.camera instanceof THREE.OrthographicCamera) {
+		// this.world.gravity.vadd(this.wind)
 
-            this.camera.left = window.innerWidth / - 48;
-            this.camera.right = window.innerWidth / 48;
-            this.camera.top = window.innerHeight / 48;
-            this.camera.bottom = window.innerHeight / - 48;
+		// let delta = Math.min(this.clock.getDelta(), 0.1)
 
-        }
-        this.camera.updateProjectionMatrix()
-        this.renderer.setSize(window.innerWidth, window.innerHeight)
-        this.render()
-    }
+		// this.world.step(delta)
 
-    reset() {
+		// for(let i =0; i < this.bodies.length; i++) {
 
-        // SOUNDS._GAME_OVER.play()
+		//     // console.log(this.meshes[i]);
 
-        // let player = this.bodies[0]
-        // player.position.copy( new CANNON.Vec3(0,10,0))
-        // player.velocity = new CANNON.Vec3(0,0,0)
+		//     this.meshes[i].position.copy(
+		//         this.bodies[i].position
+		//     )
 
-        // this.world.gravity = new CANNON.Vec3(0,-100,0)
-        // this.isStarted = false
-        // this.jump = false
+		//     this.meshes[i].quaternion.copy(
+		//         this.bodies[i].quaternion
+		//     )
 
-        window.dispatchEvent(event);
-    }
+		// }
 
-    animate() {
+		// if(this.meshes.length) {
+		//     this.camera.position.z = THREE.MathUtils.lerp(this.meshes[0].position.z + this.camera.position.y - this.offset, this.camera.position.z, 0.9);
+		//     this.controls.target.z = this.camera.position.z - this.camera.position.y
+		//     this.score.innerHTML = parseInt(-this.meshes[0].position.z)
+		// }
 
-        requestAnimationFrame(() => {
-            this.animate()
-        })
-      
-        this.controls && this.controls.update()
-        // let body = this.bodies[0]
+		// console.log(bullets)
 
-        // if(body) {
+		this.render()
+	}
 
-        //     if(this.isStarted)
-        //         body.applyImpulse(this.wind);
-
-        //     if(body.position.y < -20)
-        //         this.reset()
-            
-        // }
-
-        
-      
-        // this.world.gravity.vadd(this.wind)
-      
-        // let delta = Math.min(this.clock.getDelta(), 0.1)
-      
-        // this.world.step(delta)
-
-
-        // for(let i =0; i < this.bodies.length; i++) {
-
-        //     // console.log(this.meshes[i]);
-
-        //     this.meshes[i].position.copy(
-        //         this.bodies[i].position
-        //     )
-          
-        //     this.meshes[i].quaternion.copy(
-        //         this.bodies[i].quaternion
-        //     )
-
-        // }
-
-        // if(this.meshes.length) {
-        //     this.camera.position.z = THREE.MathUtils.lerp(this.meshes[0].position.z + this.camera.position.y - this.offset, this.camera.position.z, 0.9);  
-        //     this.controls.target.z = this.camera.position.z - this.camera.position.y
-        //     this.score.innerHTML = parseInt(-this.meshes[0].position.z)
-        // }
-      
-        // console.log(bullets)
-        
-        
-        this.render()
-    }
-
-    render() {
-        this.renderer.render(this.scene, this.camera)
-    }
+	render() {
+		this.renderer.render(this.scene, this.camera)
+	}
 }
